@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Text, View, Button } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
+
+import { mmkvStorage } from './src/services/storage/mmkvStorage';
+import { asyncStorage } from './src/services/storage/asyncStorage';
+import { initializeStorage, storageService } from './src/services/storage/storageService';
 
 interface User {
   name: string;
@@ -10,38 +13,38 @@ const mockedUser: User = {
   name: "John John"
 }
 
+initializeStorage(mmkvStorage)
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
 
   const loadData = async () => {
     try {
-      const stringUser = await AsyncStorage.getItem('my-app');
+      const userData = await storageService.getItem<User>('my-app');
 
-      if (stringUser) {
-        const userData = JSON.parse(stringUser)
+      if (userData) {
         setUser(userData)
       }
     } catch (e) {
-      // saving error
+      // handle error
     }
   };
 
   const login = async () => {
     try {
-      const jsonValue = JSON.stringify(mockedUser);
-      await AsyncStorage.setItem('my-app', jsonValue);
+      await storageService.setItem('my-app', mockedUser);
       setUser(mockedUser)
     } catch (e) {
-      // saving error
+      // handle error
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('my-app');
+      await storageService.removeItem('my-app');
       setUser(null)
     } catch (e) {
-      // saving error
+      // handle error
     }
   };
 
